@@ -26,13 +26,24 @@ except:
 
 # ----------------- Main function -----------------
 def get_answer(question: str, n_results: int = 5) -> str:
+    # Ensure n_results is at least 1
+    n_results = max(1, n_results)
+
     # Retrieve relevant chunks from Chroma
     results = collection.query(
         query_texts=[question],
         n_results=n_results
     )
+
     documents = results["documents"][0]
-    context = "No relevant documentation found." if not documents else "\n\n".join(documents)
+
+    # Adjust n_results if fewer documents are found
+    actual_k = len(documents) if documents else 0
+
+    if actual_k == 0:
+        context = "No relevant documentation found."
+    else:
+        context = "\n\n".join(documents)
 
     full_prompt = f"""
 Context:
